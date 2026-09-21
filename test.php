@@ -1,18 +1,19 @@
 <?php
+$servername = "localhost";
+$username = "username";
+$password = "password";
+$dbname = "fazbear_entertainment";
 
-$host = "localhost";
-$database = "your_database_name";
-$username = "root";
-$password = "";
-
-try {
-    $pdo = new PDO(
-        "mysql:host=$host;dbname=$database;charset=utf8mb4",
-        $username,
-        $password
-    );
-
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $error) {
-    exit("Database connection failed: " . $error->getMessage());
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+  die("Connection failed: " . $conn->connect_error);
 }
+
+$sql = "SELECT * FROM rockstar_animatronics";
+// Execute the SQL query
+$result = $conn->query($sql);
+
+$conn->close();
+?>
