@@ -3,7 +3,7 @@
 $host = "localhost";
 $database = "your_database_name";
 $username = "root";
-$password = ""; // XAMPP normally uses an empty password
+$password = "";
 
 try {
     $pdo = new PDO(
