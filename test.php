@@ -1,30 +1,18 @@
 <?php
+
 $host = "localhost";
-$database = "fazbear_entertainment";
+$database = "your_database_name";
 $username = "root";
-$password = ""; // Common XAMPP default; use your actual password if set
+$password = ""; // XAMPP normally uses an empty password
 
 try {
     $pdo = new PDO(
         "mysql:host=$host;dbname=$database;charset=utf8mb4",
         $username,
-        $password,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ]
+        $password
     );
 
-    $statement = $pdo->prepare(
-        "INSERT INTO users (name, email) VALUES (:name, :email)"
-    );
-
-    $statement->execute([
-        "name" => trim($_POST["name"] ?? ""),
-        "email" => trim($_POST["email"] ?? "")
-    ]);
-
-    echo "User saved successfully.";
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $error) {
-    exit("Database operation failed.");
+    exit("Database connection failed: " . $error->getMessage());
 }
