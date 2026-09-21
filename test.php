@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
-$username = "username";
-$password = "password";
+$username = "root";
+$password = "";
 $dbname = "fazbear_entertainment";
 
 // Create connection
@@ -17,3 +17,12 @@ $result = $conn->query($sql);
 
 $conn->close();
 ?>
+
+<!DOCTYPE html>
+<html lang="">
+    <body>
+        <form>
+             <label for="fname">Animatronics:</label><br>
+        </form>
+    </body>
+</html>
