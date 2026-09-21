@@ -1,0 +1,6 @@
+SQL queries: CREATE TABLE `fazbear_entertainment`.`rockstar_animatronics` (`Animatronic` VARCHAR(30) NOT NULL , `Price` INT(5) NOT NULL , `ATMO` INT(1) NOT NULL , `H&S` INT(1) NOT NULL , `ENTE` INT(1) NOT NULL , `REVE` INT(1) NOT NULL , `RISK` INT(2) NOT NULL ) ENGINE = InnoDB;
+
+INSERT INTO `rockstar_animatronics` (`Animatronic`, `Price`, `ATMO`, `H&S`, `ENTE`, `REVE`, `RISK`) VALUES ('Rockstar Freddy', '2000', '0', '0', '7', '0', '1'), ('Rockstar bonnie', '2000', '0', '0', '7', '0', '1'), ('Rockstar Chica', 2000, 0, 0, 7, 0, 1), ('Rockstar Foxy', 2500, 0, 0, 8, 0, 1), ('Lefty', 5, 0, 0, 9, 0, 9);
+
+
+
