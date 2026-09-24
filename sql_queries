@@ -1,7 +1,3 @@
-CREATE TABLE `fazbear_entertainment`.`rockstar_animatronics` (`Animatronic` VARCHAR(30) NOT NULL , `Price` INT(5) NOT NULL , `ATMO` INT(1) NOT NULL , `H&S` INT(1) NOT NULL , `ENTE` INT(1) NOT NULL , `REVE` INT(1) NOT NULL , `RISK` INT(2) NOT NULL ) ENGINE = InnoDB;
-
-INSERT INTO `rockstar_animatronics` (`Animatronic`, `Price`, `ATMO`, `H&S`, `ENTE`, `REVE`, `RISK`) VALUES ('Rockstar Freddy', '2000', '0', '0', '7', '0', '1'), ('Rockstar bonnie', '2000', '0', '0', '7', '0', '1'), ('Rockstar Chica', 2000, 0, 0, 7, 0, 1), ('Rockstar Foxy', 2500, 0, 0, 8, 0, 1), ('Lefty', 5, 0, 0, 9, 0, 9);
-
 CREATE TABLE `fazbear_entertainment`.`dumpster_diver_weekly`(`Item` VARCHAR(30) NOT NULL , `Price` INT(5) NOT NULL , `ATMO` INT(1) NOT NULL , `H&S` INT(1) NOT NULL , `ENTE` INT(1) NOT NULL , `REVE` INT(1) NOT NULL , `RISK` INT(2) NOT NULL ) ENGINE = InnoDB;
 
 INSERT INTO dumpster_diver_weekly (Item, Price, ATMO, `H&S`, ENTE, REVE, RISK) VALUES ('Balloon Barrel', 30.00, 0, 0, 1, 1, 0),('Discount Ball Pit',30.00, 0, 0, 3, 0, 1),('Paper Cups and Plates', 5.00, 0, 1, 0, 0, 0),('Colorful Cups and Plates', 20.00, 1, 1, 0, 0, 0),('Single Stage', 25.00, 0, 0, 0, 0, 0),('Double Stage', 75.00, 0, 0, 0, 0, 0),('Sanitation Station', 100.00, 0, 3, 0, 0, 0),('Discount Cooling Unit', 25.00, 1, 2, 0, 0, 0),('Duck Pond', 45.00, 0, 0, 2, 1, 0),('Bucket Bob',10.00, 0, 0, 1, 0, 0),('Mr. Can-Do', 10.00, 0, 0, 1, 0, 0),('Mr. Hugs', 15.00, 0, 0, 3, 0, 1),('No. 1 Crate', 10.00, 0, 0, 1, 0, 0),('Pan Stan', 10.00, 0, 0, 1, 0, 0),('Paper Pals', 5.00, 1, 0, 0, 0, 0);
