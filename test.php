@@ -38,15 +38,7 @@
             }
 
             while($row = $result->fetch_assoc()) {
-                echo "<tr>
-                    <td>" . $row["Animatronic"] . "</td>
-                    <td>" . $row["Price"] . "</td>
-                    <td>" . $row["ATMO"] . "</td>
-                    <td>" . $row["H&S"] . "</td>
-                    <td>" . $row["ENTE"] . "</td>
-                    <td>" . $row["REVE"] . "</td>
-                    <td>" . $row["RISK"] . "</td>
-                    </tr>";
+
             }
 
             $conn->close();
