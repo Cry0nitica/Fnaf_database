@@ -1,0 +1,394 @@
+<?php
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+try {
+    $conn = new mysqli(
+        "localhost",
+        "root",
+        "",
+        "fazbear_entertainment"
+    );
+
+    $conn->set_charset("utf8mb4");
+
+    $selectedName = $_GET["name"] ?? "";
+    $selectedCategory = $_GET["category"] ?? "";
+
+    $sql = "
+        SELECT animatronic_name AS name, 'Animatronic' AS category
+        FROM animatronics
+
+        UNION ALL
+
+        SELECT incident_name AS name, 'Incident' AS category
+        FROM incidents
+
+        UNION ALL
+
+        SELECT location_name AS name, 'Location' AS category
+        FROM locations
+
+        ORDER BY category, name
+    ";
+
+$result = $conn->query($sql);
+$items = $result->fetch_all(MYSQLI_ASSOC);
+
+$relatedItems = [];
+
+if ($selectedName != "") {
+
+    if ($selectedCategory == "Animatronic") {
+
+        $sql = "
+            SELECT DISTINCT
+                i.incident_name AS name,
+                'Incident' AS category
+            FROM animatronics a
+            JOIN animatronic_incidents ai
+                ON a.animatronic_id = ai.animatronic_id
+            JOIN incidents i
+                ON ai.incident_id = i.incident_id
+            WHERE a.animatronic_name = ?
+
+            UNION
+
+            SELECT DISTINCT
+                l.location_name AS name,
+                'Location' AS category
+            FROM animatronics a
+            JOIN animatronic_incidents ai
+                ON a.animatronic_id = ai.animatronic_id
+            JOIN incidents i
+                ON ai.incident_id = i.incident_id
+            JOIN incident_locations il
+                ON i.incident_id = il.incident_id
+            JOIN locations l
+                ON il.location_id = l.location_id
+            WHERE a.animatronic_name = ?
+        ";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ss", $selectedName, $selectedName);
+
+    } elseif ($selectedCategory == "Incident") {
+
+        $sql = "
+            SELECT DISTINCT
+                a.animatronic_name AS name,
+                'Animatronic' AS category
+            FROM incidents i
+            JOIN animatronic_incidents ai
+                ON i.incident_id = ai.incident_id
+            JOIN animatronics a
+                ON ai.animatronic_id = a.animatronic_id
+            WHERE i.incident_name = ?
+
+            UNION
+
+            SELECT DISTINCT
+                l.location_name AS name,
+                'Location' AS category
+            FROM incidents i
+            JOIN incident_locations il
+                ON i.incident_id = il.incident_id
+            JOIN locations l
+                ON il.location_id = l.location_id
+            WHERE i.incident_name = ?
+        ";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ss", $selectedName, $selectedName);
+
+    } elseif ($selectedCategory == "Location") {
+
+        $sql = "
+            SELECT DISTINCT
+                i.incident_name AS name,
+                'Incident' AS category
+            FROM locations l
+            JOIN incident_locations il
+                ON l.location_id = il.location_id
+            JOIN incidents i
+                ON il.incident_id = i.incident_id
+            WHERE l.location_name = ?
+
+            UNION
+
+            SELECT DISTINCT
+                a.animatronic_name AS name,
+                'Animatronic' AS category
+            FROM locations l
+            JOIN incident_locations il
+                ON l.location_id = il.location_id
+            JOIN incidents i
+                ON il.incident_id = i.incident_id
+            JOIN animatronic_incidents ai
+                ON i.incident_id = ai.incident_id
+            JOIN animatronics a
+                ON ai.animatronic_id = a.animatronic_id
+            WHERE l.location_name = ?
+        ";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ss", $selectedName, $selectedName);
+    }
+
+    $stmt->execute();
+    $relatedItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+}
+
+$conn->close();
+} catch (mysqli_sql_exception $error) {
+    error_log($error->getMessage());
+    http_response_code(500);
+    exit("Unable to load data. Check your database connection and tables.");
+}
+
+function escapeHtml($value) {
+    return htmlspecialchars(
+        (string) $value,
+        ENT_QUOTES | ENT_SUBSTITUTE,
+        "UTF-8"
+    );
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fazbear Entertainment Search</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .row {
+            display: flex;
+        }
+
+        .left {
+            flex: 35%;
+            min-width: 0;
+            padding: 15px 0;
+            background-color: #bbb;
+        }
+
+        .left h2 {
+            padding-left: 8px;
+        }
+
+        .right {
+            flex: 65%;
+            min-width: 0;
+            padding: 15px;
+            background-color: #ddd;
+            overflow-wrap: anywhere;
+        }
+
+        #mySearch {
+            width: 100%;
+            font-size: 18px;
+            padding: 11px;
+            border: 1px solid #ddd;
+        }
+
+        #myMenu {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #myMenu button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: 0;
+            background: transparent;
+            color: black;
+            text-align: left;
+            font: inherit;
+            cursor: pointer;
+            overflow-wrap: anywhere;
+        }
+
+        #myMenu button:hover,
+        #myMenu button:focus-visible {
+            background-color: #eee;
+        }
+
+        #myMenu small {
+            display: block;
+            margin-top: 4px;
+            color: #444;
+        }
+
+        #noResults {
+            padding: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Fazbear Entertainment Search</h2>
+    <p>Search for an animatronic, incident, or location.</p>
+
+    <div class="row">
+        <div class="left">
+            <h2>Menu</h2>
+
+            <input
+                type="search"
+                id="mySearch"
+                placeholder="Search..."
+                aria-label="Search animatronics, incidents, and locations"
+                aria-controls="myMenu"
+            >
+
+            <ul id="myMenu">
+                <?php foreach ($items as $item): ?>
+    <li>
+        <button
+            type="button"
+            data-name="<?= escapeHtml($item["name"]) ?>"
+            data-category="<?= escapeHtml($item["category"]) ?>"
+        >
+            <span class="item-name">
+                <?= escapeHtml($item["name"]) ?>
+            </span>
+
+            <small class="item-category">
+                <?= escapeHtml($item["category"]) ?>
+            </small>
+        </button>
+    </li>
+<?php endforeach; ?>
+            </ul>
+
+            <p id="noResults" role="status" hidden>
+                No matching results.
+            </p>
+        </div>
+
+        <div class="right" aria-live="polite">
+
+    <?php if ($selectedName != ""): ?>
+
+        <h2>
+            <?= escapeHtml($selectedName) ?>
+        </h2>
+
+        <p>
+            <?= escapeHtml($selectedCategory) ?>
+        </p>
+
+        <h3>Related:</h3>
+
+        <?php if (count($relatedItems) > 0): ?>
+
+            <ul>
+                <?php foreach ($relatedItems as $item): ?>
+
+                    <li>
+                        <strong>
+                            <?= escapeHtml($item["name"]) ?>
+                        </strong>
+
+                        -
+                        <?= escapeHtml($item["category"]) ?>
+                    </li>
+
+                <?php endforeach; ?>
+            </ul>
+
+        <?php else: ?>
+
+            <p>No related information found.</p>
+
+        <?php endif; ?>
+
+    <?php else: ?>
+
+        <h2>Page Content</h2>
+
+        <p>
+            Select a name from the menu to view it here.
+        </p>
+
+    <?php endif; ?>
+
+</div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById("mySearch");
+        const menu = document.getElementById("myMenu");
+        const menuItems = menu.querySelectorAll("li");
+        const noResults = document.getElementById("noResults");
+
+        function filterMenu() {
+            const filter = searchInput.value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            menuItems.forEach(function (item) {
+                const name = item
+                    .querySelector(".item-name")
+                    .textContent.trim();
+
+                const category = item
+                    .querySelector(".item-category")
+                    .textContent.trim();
+
+                const matches = (name + " " + category)
+                    .toLowerCase()
+                    .includes(filter);
+
+                item.hidden = !matches;
+
+                if (matches) {
+                    visibleCount++;
+                }
+            });
+
+            noResults.hidden = visibleCount > 0;
+        }
+
+        searchInput.addEventListener("input", filterMenu);
+
+        menu.addEventListener("click", function (event) {
+
+    const button = event.target.closest("button");
+
+    if (!button) {
+        return;
+    }
+
+    const name = button.dataset.name;
+    const category = button.dataset.category;
+
+    const url = new URL(window.location.href);
+
+    url.searchParams.set("name", name);
+    url.searchParams.set("category", category);
+
+    window.location.href = url.toString();
+});
+
+        filterMenu();
+    </script>
+
+</body>
+</html>
